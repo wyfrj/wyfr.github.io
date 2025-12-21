@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>时间卡片备忘录</title>
-    <link rel="stylesheet" href="style.css">
     <style>
         /* 页面样式 */
         body {
@@ -800,10 +799,33 @@
     <div class="settings-panel" id="settingsPanel" style="display: none;">
         <div class="settings-title">设置</div>
         <div class="setting-item">
-            <span class="setting-label">背景</span>
+            <span class="setting-label">毛玻璃背景</span>
             <div class="checkbox-wrapper-8">
                 <input type="checkbox" id="glassEffect" class="tgl tgl-skewed" onchange="toggleGlassEffect()">
                 <label class="tgl-btn" data-tg-on="ON" data-tg-off="OFF" for="glassEffect"></label>
+            </div>
+        </div>
+
+        <div class="setting-item">
+            <span class="setting-label">自定义背景</span>
+            <div class="checkbox-wrapper-8">
+                <input type="checkbox" id="customBgToggle" class="tgl tgl-skewed" onchange="toggleCustomBackground()">
+                <label class="tgl-btn" data-tg-on="ON" data-tg-off="OFF" for="customBgToggle"></label>
+            </div>
+        </div>
+
+        <div class="setting-item" id="bgControls" style="display: none; flex-direction: column; gap: 8px; align-items: flex-start;">
+            <label class="setting-label" style="width:100%;">纯色</label>
+            <input type="color" id="bgColorInput" value="#ffffff" onchange="handleColorChange(this)">
+
+            <label class="setting-label" style="width:100%;">图片上传</label>
+            <input type="file" id="bgImageInput" accept="image/*" onchange="handleImageUpload(this)">
+            <div id="bgPreview" style="width:100%; height:60px; background-size:cover; background-position:center; border-radius:6px; border:1px solid #ddd; display:none;"></div>
+
+            <div style="display:flex; gap:6px; width:100%; align-items:center;">
+                <button class="button" onclick="applyPreset('gradient1')"><span class="shadow"></span><span class="edge"></span><span class="front">渐变1</span></button>
+                <button class="button" onclick="applyPreset('gradient2')"><span class="shadow"></span><span class="edge"></span><span class="front">渐变2</span></button>
+                <button class="button" onclick="clearBackground()"><span class="shadow"></span><span class="edge"></span><span class="front">清除</span></button>
             </div>
         </div>
     </div>
@@ -814,7 +836,11 @@
         
         // 初始化设置
         let settings = JSON.parse(localStorage.getItem('memoSettings')) || {
-            glassEffect: true
+            glassEffect: true,
+            customBackground: false,
+            backgroundColor: '#ffffff',
+            backgroundImage: '',
+            backgroundPreset: ''
         };
 
         // 页面加载时初始化
@@ -828,6 +854,17 @@
             
             // 应用保存的设置
             applySettings();
+            // 初始化背景控件显示
+            const customToggle = document.getElementById('customBgToggle');
+            const bgControls = document.getElementById('bgControls');
+            const colorInput = document.getElementById('bgColorInput');
+            const imgInput = document.getElementById('bgImageInput');
+            const preview = document.getElementById('bgPreview');
+            if (customToggle) customToggle.checked = settings.customBackground;
+            if (bgControls) bgControls.style.display = settings.customBackground ? 'flex' : 'none';
+            if (colorInput && settings.backgroundColor) colorInput.value = settings.backgroundColor;
+            if (preview && settings.backgroundImage) { preview.style.display = 'block'; preview.style.backgroundImage = `url(${settings.backgroundImage})`; }
+            applyBackgroundSettings();
         });
 
         // 切换设置面板显示/隐藏
@@ -854,6 +891,16 @@
             applyGlassEffect();
         }
 
+        // 切换自定义背景开关
+        function toggleCustomBackground() {
+            const checkbox = document.getElementById('customBgToggle');
+            const bgControls = document.getElementById('bgControls');
+            settings.customBackground = checkbox.checked;
+            localStorage.setItem('memoSettings', JSON.stringify(settings));
+            if (bgControls) bgControls.style.display = settings.customBackground ? 'flex' : 'none';
+            applyBackgroundSettings();
+        }
+
         // 应用所有设置
         function applySettings() {
             const checkbox = document.getElementById('glassEffect');
@@ -861,6 +908,10 @@
                 checkbox.checked = settings.glassEffect;
             }
             applyGlassEffect();
+            // 自定义背景
+            const customToggle = document.getElementById('customBgToggle');
+            if (customToggle) customToggle.checked = !!settings.customBackground;
+            applyBackgroundSettings();
         }
 
         // 应用毛玻璃效果
@@ -891,6 +942,86 @@
                 if (timeCard) {
                     timeCard.style.background = 'rgb(17, 4, 134)';
                 }
+            }
+        }
+
+        // 处理颜色变化
+        function handleColorChange(input) {
+            settings.backgroundColor = input.value;
+            settings.backgroundImage = '';
+            settings.backgroundPreset = '';
+            localStorage.setItem('memoSettings', JSON.stringify(settings));
+            applyBackgroundSettings();
+        }
+
+        // 处理图片上传
+        function handleImageUpload(input) {
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                settings.backgroundImage = e.target.result;
+                settings.backgroundPreset = '';
+                localStorage.setItem('memoSettings', JSON.stringify(settings));
+                const preview = document.getElementById('bgPreview');
+                if (preview) {
+                    preview.style.display = 'block';
+                    preview.style.backgroundImage = `url(${settings.backgroundImage})`;
+                }
+                applyBackgroundSettings();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 应用预设
+        function applyPreset(name) {
+            if (name === 'gradient1') {
+                settings.backgroundPreset = 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)';
+            } else if (name === 'gradient2') {
+                settings.backgroundPreset = 'linear-gradient(135deg,#f6d365 0%,#fda085 100%)';
+            }
+            settings.backgroundImage = '';
+            localStorage.setItem('memoSettings', JSON.stringify(settings));
+            applyBackgroundSettings();
+        }
+
+        // 清除自定义背景
+        function clearBackground() {
+            settings.backgroundImage = '';
+            settings.backgroundPreset = '';
+            settings.backgroundColor = '#ffffff';
+            const preview = document.getElementById('bgPreview');
+            const colorInput = document.getElementById('bgColorInput');
+            if (preview) { preview.style.display = 'none'; preview.style.backgroundImage = ''; }
+            if (colorInput) colorInput.value = settings.backgroundColor;
+            localStorage.setItem('memoSettings', JSON.stringify(settings));
+            applyBackgroundSettings();
+        }
+
+        // 将自定义背景应用到页面
+        function applyBackgroundSettings() {
+            const body = document.body;
+            const timeCard = document.querySelector('.time-card');
+
+            if (!settings.customBackground) {
+                // 恢复默认背景（但保留毛玻璃设置的影响）
+                applyGlassEffect();
+                return;
+            }
+
+            // 优先级： 图片 > 预设 > 纯色
+            if (settings.backgroundImage) {
+                body.style.background = `url(${settings.backgroundImage}) center/cover fixed no-repeat`;
+            } else if (settings.backgroundPreset) {
+                body.style.background = settings.backgroundPreset;
+            } else if (settings.backgroundColor) {
+                body.style.background = settings.backgroundColor;
+            }
+
+            // 如果使用图片或深色预设，关闭备忘录透明以保证可读性
+            const memoSection = document.querySelector('.memo-section');
+            if (memoSection) {
+                memoSection.style.background = settings.customBackground && !settings.backgroundImage ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.85)';
             }
         }
 
