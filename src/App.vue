@@ -53,8 +53,10 @@ const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
   if (isDarkMode.value) {
     document.documentElement.classList.add('dark')
+    document.documentElement.setAttribute('data-color-mode', 'dark')
   } else {
     document.documentElement.classList.remove('dark')
+    document.documentElement.setAttribute('data-color-mode', 'light')
   }
   localStorage.setItem('darkMode', isDarkMode.value)
 }
@@ -68,6 +70,9 @@ onMounted(() => {
   }
   if (isDarkMode.value) {
     document.documentElement.classList.add('dark')
+    document.documentElement.setAttribute('data-color-mode', 'dark')
+  } else {
+    document.documentElement.setAttribute('data-color-mode', 'light')
   }
 })
 </script>
@@ -260,3 +265,13 @@ onMounted(() => {
   }
 }
 </style>
+
+<style>
+/* 引入Gmeek基础样式 */
+@import './assets/GmeekBaseTheme.css';
+</style>
+
+<script>
+// 引入Gmeek自定义脚本
+import './assets/GmeekCustomizeCss.js';
+</script>
