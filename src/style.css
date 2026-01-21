@@ -19,20 +19,45 @@ body {
   line-height: 1.6;
   color: var(--text-dark);
   background-color: var(--bg-light);
+  transition: all 0.3s ease;
 }
 
-/* 全局CSS变量 */
+/* 全局CSS变量 - 浅色模式 */
 :root {
   --primary: #3b82f6;
   --primary-light: #dbeafe;
+  --primary-dark: #2563eb;
   --text-dark: #1e293b;
   --text-muted: #64748b;
   --bg-light: #f8fafc;
   --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --bg-card: #ffffff;
   --border-color: #e2e8f0;
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --code-bg: #f1f5f9;
+  --code-text: #334155;
+}
+
+/* 暗色模式 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #60a5fa;
+    --primary-light: #1e40af;
+    --primary-dark: #3b82f6;
+    --text-dark: #f8fafc;
+    --text-muted: #94a3b8;
+    --bg-light: #0f172a;
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --bg-card: #1e293b;
+    --border-color: #334155;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    --code-bg: #334155;
+    --code-text: #f1f5f9;
+  }
 }
 
 /* 通用样式 */
@@ -53,6 +78,8 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .btn-primary {
@@ -61,23 +88,78 @@ body {
 }
 
 .btn-primary:hover {
-  background-color: #2563eb;
+  background-color: var(--primary-dark);
   transform: translateY(-1px);
   box-shadow: var(--shadow-md);
 }
 
 /* 卡片样式 */
 .card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 0.5rem;
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
 }
 
 .card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+}
+
+/* 代码高亮 */
+pre {
+  background: var(--code-bg);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+  border: 1px solid var(--border-color);
+}
+
+code {
+  font-family: 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: var(--code-text);
+  background: var(--code-bg);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 /* 响应式设计 */
@@ -91,4 +173,95 @@ body {
   html {
     font-size: 13px;
   }
+}
+
+/* Geek 风格的装饰元素 */
+.geek-decoration {
+  position: relative;
+}
+
+.geek-decoration::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(45deg, var(--primary), transparent, var(--primary));
+  border-radius: 0.5rem;
+  z-index: -1;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.geek-decoration:hover::before {
+  opacity: 0.3;
+  animation: pulse 2s infinite;
+}
+
+/* 科技感边框 */
+.tech-border {
+  position: relative;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+.tech-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  animation: scan 3s linear infinite;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* 加载动画 */
+.loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
 }

@@ -9,6 +9,10 @@
           <router-link to="/" class="nav-link">首页</router-link>
           <router-link to="/blog" class="nav-link">博客</router-link>
           <router-link to="/about" class="nav-link">关于我</router-link>
+          <button class="theme-toggle" @click="toggleTheme">
+            <Sun v-if="isDarkMode" />
+            <Moon v-else />
+          </button>
         </nav>
       </div>
     </header>
@@ -29,13 +33,43 @@
           <router-link to="/blog" class="footer-link">博客</router-link>
           <router-link to="/about" class="footer-link">关于我</router-link>
         </div>
+        <div class="footer-tech">
+          <span class="tech-badge">Vue 3</span>
+          <span class="tech-badge">Vite</span>
+          <span class="tech-badge">GitHub Pages</span>
+        </div>
       </div>
     </footer>
   </div>
 </template>
 
 <script setup>
-// App component
+import { ref, onMounted } from 'vue'
+import { Sun, Moon } from 'lucide-vue-next'
+
+const isDarkMode = ref(false)
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+  localStorage.setItem('darkMode', isDarkMode.value)
+}
+
+onMounted(() => {
+  const savedMode = localStorage.getItem('darkMode')
+  if (savedMode !== null) {
+    isDarkMode.value = savedMode === 'true'
+  } else {
+    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+  if (isDarkMode.value) {
+    document.documentElement.classList.add('dark')
+  }
+})
 </script>
 
 <style scoped>
@@ -43,14 +77,18 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  transition: all 0.3s ease;
 }
 
 .navbar {
-  background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .navbar-container {
@@ -64,16 +102,26 @@
 
 .navbar-brand {
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .brand-name {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary);
+  transition: all 0.3s ease;
+}
+
+.brand-name:hover {
+  color: var(--primary-dark);
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
 }
 
 .navbar-nav {
   display: flex;
+  align-items: center;
   gap: 2rem;
 }
 
@@ -83,6 +131,7 @@
   font-weight: 500;
   transition: all 0.3s ease;
   position: relative;
+  padding: 0.5rem 0;
 }
 
 .nav-link:hover {
@@ -96,23 +145,47 @@
 .nav-link.router-link-active::after {
   content: '';
   position: absolute;
-  bottom: -5px;
+  bottom: 0;
   left: 0;
   width: 100%;
   height: 2px;
   background: var(--primary);
   border-radius: 2px;
+  animation: scan 2s linear infinite;
+}
+
+.theme-toggle {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-dark);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  transform: rotate(180deg);
 }
 
 .main-content {
   flex: 1;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
 .footer {
-  background: var(--text-dark);
-  color: white;
+  background: var(--bg-card);
+  color: var(--text-dark);
   padding: 3rem 2rem 1rem;
   margin-top: auto;
+  border-top: 1px solid var(--border-color);
+  transition: all 0.3s ease;
 }
 
 .footer-container {
@@ -125,18 +198,34 @@
   display: flex;
   justify-content: center;
   gap: 2rem;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
+  margin: 1rem 0 2rem;
 }
 
 .footer-link {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-muted);
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
 .footer-link:hover {
-  color: white;
+  color: var(--primary);
+}
+
+.footer-tech {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.tech-badge {
+  font-size: 0.8rem;
+  padding: 0.3rem 0.8rem;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 20px;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
 }
 
 .fade-enter-active,
@@ -164,6 +253,10 @@
 
   .footer-links {
     gap: 1rem;
+  }
+
+  .footer-tech {
+    flex-wrap: wrap;
   }
 }
 </style>
